@@ -83,9 +83,15 @@ GEMINI_MODEL_LIST = (
     "gemini-1.5-flash-exp-0827",
     "gemini-1.5-flash-8b",
     "gemini-1.5-flash-8b-exp-0827",
+    "gemini-2.0-flash-001",
 )
 
-API_MODEL_LIST = OPENAI_MODEL_LIST + ANTHROPIC_MODEL_LIST + TOGETHER_MODEL_LIST + GEMINI_MODEL_LIST
+OPENAI_COMPATIBLE_MODEL_LIST = (
+    "deepseek-ai/DeepSeek-R1",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+)
+
+API_MODEL_LIST = OPENAI_MODEL_LIST + ANTHROPIC_MODEL_LIST + TOGETHER_MODEL_LIST + GEMINI_MODEL_LIST + OPENAI_COMPATIBLE_MODEL_LIST
 
 
 # API setting constants
@@ -490,7 +496,7 @@ def run_judge_pair(question, answer_a, answer_b, model, multi_turn=False, model_
             judgments.append(judgment)
         return winners, user_prompt, judgments
 
-    if model in OPENAI_MODEL_LIST:
+    if model in OPENAI_MODEL_LIST or model in OPENAI_COMPATIBLE_MODEL_LIST:
         template = "chatgpt"
         conv = get_conv_template(template)
 
@@ -631,7 +637,12 @@ def chat_completion_together(model, conv, temperature, max_tokens, api_dict=None
 
 
 def chat_completion_openai(model, conv, temperature, max_tokens, api_dict=None):
-    client = OpenAI()
+    if model in OPENAI_COMPATIBLE_MODEL_LIST:
+        # Use custom base URL for compatible models
+        client = OpenAI(base_url=os.environ.get("OPENAI_API_BASE"), api_key=os.environ.get("OPENAI_API_KEY"))
+    else:
+        client = OpenAI()
+    
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:

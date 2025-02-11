@@ -38,6 +38,7 @@ from rewardbench.generative import (
     API_MODEL_LIST,
     GEMINI_MODEL_LIST,
     OPENAI_MODEL_LIST,
+    OPENAI_COMPATIBLE_MODEL_LIST,
     format_judge_answers,
     process_judgement,
     run_judge_pair,
